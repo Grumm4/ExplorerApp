@@ -1,0 +1,27 @@
+﻿<Window x:Class="ExplorerApp.Drives"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExplorerApp"
+        Loaded="Window_Loaded"
+        mc:Ignorable="d"
+        Title="Drives" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <DataGrid x:Name="dgDrives" AutoGenerateColumns="False" Background="Transparent"
+          GridLinesVisibility="None" BorderThickness="0" CanUserResizeColumns="False" CanUserReorderColumns="False"
+          HeadersVisibility="None" SelectionMode="Single" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+          Margin="0,10,0,10" Grid.Row="1" VerticalContentAlignment="Center" FontSize="18" IsReadOnly="True" MouseDoubleClick="DgDrives_MouseDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <local:DriveCard/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+
+        </DataGrid>
+    </Grid>
+</Window>

@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="ExplorerApp.DriveCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ExplorerApp"
+             mc:Ignorable="d" MinHeight="50" MinWidth="350">
+    <Grid>
+        <Grid.RowDefinitions>
+            
+            <RowDefinition Height="65"/>
+            
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="65*"/>
+            <ColumnDefinition Width="300*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Image x:Name="DriveImage" Grid.Row="0" Grid.Column="0" Height="55" Width="55" Stretch="Fill" Source="{Binding Image}"/>
+        <Label x:Name="DriveName" Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" Content="{Binding CardLabelString}" Background="Transparent" Foreground="Black" FontSize="14"/>
+        <ProgressBar x:Name="DriveProgresBarAvailableFreeSpace" Grid.Row="0" Grid.Column="1" Background="Transparent" Foreground="Black" Height="10"/>
+        <Label x:Name="DriveLabelAvailableFreeSpace" Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom" Background="Transparent" Foreground="Black" Content="{Binding CardSpaceString}" FontSize="14"/>
+    </Grid>
+</UserControl>
