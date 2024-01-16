@@ -45,7 +45,7 @@ namespace ExplorerApp
             // Преобразование ImageSource в byte[]
             var dictBytes = imageCache.ToDictionary(pair => pair.Key, pair => ImageSourceToBytes(pair.Value));
 
-            // Сериализация в JSON 
+            // Сериализация в JSON
             var jsonText = JsonSerializer.Serialize(dictBytes);
 
             // Сохранение JSON в файл
