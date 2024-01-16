@@ -38,7 +38,7 @@ namespace ExplorerApp
 
             // Преобразование byte[] обратно в ImageSource
             imageCache = deserializedDictBytes.ToDictionary(pair => pair.Key, pair => BytesToImageSource(pair.Value));
-        } 
+        }
 
         private void Window_Closed(object sender, EventArgs e)
         {
