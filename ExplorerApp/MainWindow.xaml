@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ExplorerApp"
         
         mc:Ignorable="d"
-        Title="MainWindow" Height="536" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="MainWindow" Height="536" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="45*"/>
