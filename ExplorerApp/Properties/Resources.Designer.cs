@@ -63,9 +63,9 @@ namespace ExplorerApp.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap driveIcon {
+        internal static System.Drawing.Bitmap directory {
             get {
-                object obj = ResourceManager.GetObject("driveIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("directory", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace ExplorerApp.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap file {
+        internal static System.Drawing.Bitmap driveIcon {
             get {
-                object obj = ResourceManager.GetObject("file", resourceCulture);
+                object obj = ResourceManager.GetObject("driveIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

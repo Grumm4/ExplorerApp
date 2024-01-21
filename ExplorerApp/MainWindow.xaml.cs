@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Drawing;
+using System.Windows.Controls;
 namespace ExplorerApp
 {
     /// <summary>
@@ -26,6 +27,7 @@ namespace ExplorerApp
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            
             if (!File.Exists("imageCache.json"))
             {
                 return;
@@ -36,8 +38,23 @@ namespace ExplorerApp
             // Десериализация из JSON
             var deserializedDictBytes = JsonSerializer.Deserialize<Dictionary<string, byte[]>>(jsonString);
 
-            // Преобразование byte[] обратно в ImageSource
-            imageCache = deserializedDictBytes.ToDictionary(pair => pair.Key, pair => BytesToImageSource(pair.Value));
+            // Преобразование byte[] обратно в BitmapSource
+            imageCache = deserializedDictBytes.ToDictionary(pair => pair.Key, pair => BytesToBitmapSource(pair.Value));
+            
+        }
+
+        private async void HiddenBt_Click(object sender, RoutedEventArgs e)
+        {
+            if ((string)(sender as Button).Content == (string)App.Current.FindResource("ShowHidden"))
+            {
+                HiddenBt.Content = (string)App.Current.FindResource("NotShowHidden");
+            }
+            else
+            {
+                HiddenBt.Content = (string)App.Current.FindResource("ShowHidden");
+            }
+            
+            await GetDirectoriesAndFiles(TbPath.Text);
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -74,12 +91,7 @@ namespace ExplorerApp
 
         public byte[] ImageSourceToBytes(ImageSource imageSource)
         {
-            BitmapImage bitmapImage = ConvertToBitmapImage(imageSource);
-
-            if (bitmapImage == null)
-            {
-                throw new ArgumentException("ImageSource должен быть типа BitmapImage");
-            }
+            BitmapImage bitmapImage = ConvertToBitmapImage(imageSource) ?? throw new ArgumentException("ImageSource должен быть типа BitmapImage");
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
             
@@ -91,123 +103,57 @@ namespace ExplorerApp
             }
         }
 
-        public BitmapSource BytesToImageSource(byte[] imageData)
+        public BitmapSource BytesToBitmapSource(byte[] imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;
 
-            BitmapImage image = new BitmapImage();
+            BitmapImage source = new BitmapImage();
             using (MemoryStream ms = new MemoryStream(imageData))
             {
                 ms.Position = 0;
-                image.BeginInit();
-                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.UriSource = null;
-                image.StreamSource = ms;
-                image.EndInit();
+                source.BeginInit();
+                source.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                source.CacheOption = BitmapCacheOption.OnLoad;
+                source.UriSource = null;
+                source.StreamSource = ms;
+                source.EndInit();
             }
-            image.Freeze();
-            return image;
+            source.Freeze();
+            return source;
         }
-
-        //string ImageToBase64(BitmapSource bitmap)
-        //{
-        //    var encoder = new PngBitmapEncoder();
-        //    var frame = BitmapFrame.Create(bitmap);
-        //    encoder.Frames.Add(frame);
-        //    using (var stream = new MemoryStream())
-        //    {
-        //        encoder.Save(stream);
-        //        return Convert.ToBase64String(stream.ToArray());
-        //    }
-        //}
-
-        //BitmapSource Base64ToImage(string base64)
-        //{
-        //    byte[] bytes = Convert.FromBase64String(base64);
-        //    using (var stream = new MemoryStream(bytes))
-        //    {
-        //        bytes.BeginInit();
-        //        source.StreamSource = stream;
-        //        source.CacheOption = BitmapCacheOption.OnLoad;    // not a mistake - see below
-        //        source.EndInit();
-        //    }
-        //}
-
-        //internal async Task GetDirectoriesAndFiles(string path)
-        //{
-        //    List<DirectoryInfo> dirs = await Task.Run(() => new DirectoryInfo(path).GetDirectories("*", SearchOption.TopDirectoryOnly).ToList());
-        //    List<FileInfo> files = await Task.Run(() => new DirectoryInfo(path).GetFiles("*", SearchOption.TopDirectoryOnly).ToList());
-
-
-        //    List<string> strings = new List<string>();
-        //    strings.AddRange(from d in dirs select d.FullName);
-        //    strings.AddRange(from f in files select f.FullName);
-
-        //    List<Model> list = new List<Model>();
-
-        //    foreach (var item in strings)
-        //    {
-        //        FileInfo fileInfo = new FileInfo(item);
-
-        //        Model model = new Model
-        //        {
-        //            //Image = GetIcons(fileInfo),
-        //            Label = fileInfo.Name,
-        //            Path = fileInfo.FullName,
-        //            DateOfChange = fileInfo.LastAccessTime.ToShortDateString(),
-        //            Size = Directory.Exists(item) ? String.Empty : Math.Ceiling(Convert.ToDouble(fileInfo.Length) / 1024).ToString() + " КБ",
-        //            Type = Directory.Exists(item) ? "Папка" : "Файл"
-        //        };
-        //        list.Add(model);
-        //    }
-
-        //    TbPath.Text = path;
-        //    dgExplorer.ItemsSource = list;
-
-        //    ItemsCount.Content = "Элементов: " + strings.Count;
-        //}
 
         internal async Task GetDirectoriesAndFiles(string path)
         {
             var directories = await Task.Run(() => Directory.GetDirectories(path).ToList());
-            directories.RemoveAll(dir => (File.GetAttributes(dir) & FileAttributes.Hidden) == FileAttributes.Hidden);
-
             var files = await Task.Run(() => Directory.GetFiles(path).ToList());
-            files.RemoveAll(dir => (File.GetAttributes(dir) & FileAttributes.Hidden) == FileAttributes.Hidden);
+            
+            if ((string)HiddenBt.Content != (string)App.Current.FindResource("ShowHidden"))
+            {
+                directories.RemoveAll(dir => (File.GetAttributes(dir) & FileAttributes.Hidden) == FileAttributes.Hidden);
+                files.RemoveAll(dir => (File.GetAttributes(dir) & FileAttributes.Hidden) == FileAttributes.Hidden);
+            }
 
             List<Model> list = new List<Model>();
 
             foreach (var dir in directories)
             {
                 Model model = await CreateModelFromPath(dir, true);
-                if ((model.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
-                {
-                    continue;
-                }
-                else
-                {
-                    list.Add(model);
-                }
+                list.Add(model);
             }
 
             foreach (var file in files)
             {
                 Model model = await CreateModelFromPath(file, false);
-                if ((model.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
-                {
-                    continue;
-                }
-                else
-                {
-                    list.Add(model);
-                }
+                list.Add(model);
             }
 
             TbPath.Text = path;
             dgExplorer.ItemsSource = list;
 
-            ItemsCount.Content = imageCache.Count.ToString();//"Элементов: " + list.Count;
+            ItemsCount.Content = $"Элементов: {list.Count}"; //"Элементов: " + list.Count;
+            LabelItemsCount.Content = imageCache.Count.ToString();
+
+            dgExplorer.ScrollIntoView(0);
         }
 
         private async Task<Model> CreateModelFromPath(string path, bool isDirectory)
@@ -228,11 +174,10 @@ namespace ExplorerApp
                 Label = info.Name,
                 Path = info.FullName,
                 DateOfChange = info.LastAccessTime.ToShortDateString(),
-                Size = (info is FileInfo) ? Math.Ceiling(Convert.ToDouble(((FileInfo)info).Length) / 1024).ToString() + " КБ" : String.Empty,
+                Size = (info is FileInfo) ? Math.Ceiling(Convert.ToDouble(((FileInfo)info).Length) / 1024).ToString() + " КБ" : string.Empty,
                 Type = (info is DirectoryInfo) ? "Папка" : "Файл",
                 Attributes = info.Attributes
             };
-
             
             return model;
         }
@@ -255,7 +200,6 @@ namespace ExplorerApp
                     {
                         var bitmap = icon.ToBitmap();
                         var bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                        
                         imageCache.Add (fileInfo.FullName, bitmapSource);
                         return bitmapSource;
                     }
@@ -263,12 +207,8 @@ namespace ExplorerApp
                 }
                 else
                 {
-                    BitmapSource imageSource = (BitmapSource)new ImageSourceConverter().ConvertFromString("..\\..\\Resources\\file.png");
-                    
-                    //SerializableImage img = new SerializableImage { Image = imageSource };
-
-                    //imageCache.Add(fileInfo.FullName, imageSource);
-                    return imageSource;
+                    BitmapSource bitmapSource = (BitmapSource)new ImageSourceConverter().ConvertFromString("..\\..\\Resources\\directory.png");
+                    return bitmapSource;
                 }
             }).Task;
             
@@ -282,28 +222,35 @@ namespace ExplorerApp
 
         private async void DgExplorer_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            string cellValue = String.Empty;
-
-            if (Directory.Exists(((Model)dgExplorer.SelectedItem).Path))
-                cellValue = ((Model)dgExplorer.SelectedItem).Path;
-
-            else if (File.Exists(((Model)dgExplorer.SelectedItem).Path))
+            string cellValue = string.Empty;
+            if ((Model)dgExplorer.SelectedItem == null)
             {
-                var selectedRow = ((Model)dgExplorer.SelectedItem).Path;
-
-                ProcessStartInfo startInfo = new ProcessStartInfo(selectedRow)
-                {
-                    FileName = selectedRow,
-                    UseShellExecute = false
-                };
-                //исполняемыфй или нет
-                Process.Start(startInfo);
                 return;
             }
+            else
+            {
+                var selectedItem = ((Model)dgExplorer.SelectedItem).Path;
 
-            //cellValue = ((Model)dgExplorer.SelectedItem).Path;
+                if (!string.IsNullOrEmpty(selectedItem))
+                {
+                    if (Directory.Exists(selectedItem))
+                        cellValue = ((Model)dgExplorer.SelectedItem).Path;
 
-            await GetDirectoriesAndFiles(cellValue);
+                    else if (File.Exists(((Model)dgExplorer.SelectedItem).Path))
+                    {
+                        var selectedRow = ((Model)dgExplorer.SelectedItem).Path;
+
+                        ProcessStartInfo startInfo = new ProcessStartInfo(selectedRow)
+                        {
+                            FileName = selectedRow,
+                            UseShellExecute = false
+                        };
+                        Process.Start(selectedRow);
+                        return;
+                    }
+                    await GetDirectoriesAndFiles(cellValue);
+                }
+            }            
         }
 
         private async void BackBt_Click(object sender, RoutedEventArgs e)
@@ -322,7 +269,5 @@ namespace ExplorerApp
                 await GetDirectoriesAndFiles(string.Join("\\", list));
             }
         }
-
-        
     }
 }

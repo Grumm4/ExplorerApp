@@ -3,4 +3,6 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
     <sys:String x:Key="FileImage">Images/file.png</sys:String>
+    <sys:String x:Key="ShowHidden">◑</sys:String>
+    <sys:String x:Key="NotShowHidden">◐</sys:String>
 </ResourceDictionary>

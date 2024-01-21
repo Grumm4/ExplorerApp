@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ExplorerApp"
         
         mc:Ignorable="d"
-        Title="MainWindow" Height="536" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="MainWindow" Height="536" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closed="Window_Closed" MinWidth="500">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="45*"/>
@@ -15,12 +15,14 @@
         </Grid.RowDefinitions>
 
         <Frame x:Name="mainFrame" NavigationUIVisibility="Hidden"/>
-        
-        <Menu>
-            <MenuItem x:Name="BackBt" Header="←" BorderThickness="0.3" BorderBrush="Black" Height="20" Width="35" Click="BackBt_Click"/>
 
-            <TextBox x:Name="TbPath" BorderThickness="0.3" BorderBrush="Black" Height="20" Width="300"/>
+        <Menu Height="auto" VerticalAlignment="Top">
+            <Button x:Name="BackBt" Content="&lt;" BorderThickness="0.3" BorderBrush="Black" Height="20" Width="20" Click="BackBt_Click" Focusable="False"/>
+            <TextBox x:Name="TbPath" BorderThickness="0.3" BorderBrush="Black" Height="20" Width="300" IsEnabled="False"/>
+            <Button x:Name="HiddenBt" Content="{StaticResource NotShowHidden}" Height="20" Width="20" Click="HiddenBt_Click" Focusable="False"/>
         </Menu>
+
+        <Label x:Name="LabelItemsCount" Grid.Row="0" VerticalAlignment="Bottom" Width="auto" HorizontalAlignment="Left"/>
 
         <DataGrid x:Name="dgExplorer" AutoGenerateColumns="False" Background="Transparent"
                   GridLinesVisibility="None" BorderThickness="0,0,0,0" CanUserResizeColumns="False" CanUserReorderColumns="False" 
@@ -30,7 +32,7 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding Image}" Width="20" Height="20" Stretch="Fill"/>
+                            <Image Source="{Binding Image}" Width="20" Height="20" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

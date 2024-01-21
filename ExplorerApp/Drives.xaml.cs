@@ -59,6 +59,8 @@ namespace ExplorerApp
         {
             string cellValue;
 
+            if ((DrivesModel)dgDrives.SelectedItem == null)
+                return;
             cellValue = ((DrivesModel)dgDrives.SelectedItem).VolumeCharacter;
 
             List<string> strings = cellValue.Split('\\').ToList();
