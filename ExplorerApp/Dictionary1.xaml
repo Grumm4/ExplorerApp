@@ -5,4 +5,7 @@
     <sys:String x:Key="FileImage">Images/file.png</sys:String>
     <sys:String x:Key="ShowHidden">◑</sys:String>
     <sys:String x:Key="NotShowHidden">◐</sys:String>
+    <sys:String x:Key="FindSymbol">🔍</sys:String>
+    <sys:String x:Key="CloseMenu">&gt;&gt;</sys:String>
+    <sys:String x:Key="OpenMenu">&lt;&lt;</sys:String>
 </ResourceDictionary>

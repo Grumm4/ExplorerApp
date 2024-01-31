@@ -68,6 +68,8 @@ namespace ExplorerApp
             string character = string.Join("\\", strings);
 
             MainWindow window = new MainWindow();
+            window.Left = this.Left;
+            window.Top = this.Top;
             window.Show();
             this.Close();
             await window.GetDirectoriesAndFiles(character);

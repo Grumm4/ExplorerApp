@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Drawing;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media.Animation;
 namespace ExplorerApp
 {
     /// <summary>
@@ -20,6 +22,8 @@ namespace ExplorerApp
     {
         //XmlSerializer serializer;
         private Dictionary<string, BitmapSource> imageCache = new Dictionary<string, BitmapSource>();
+        //ResourceDictionary dictionary = new ResourceDictionary();
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -27,7 +31,8 @@ namespace ExplorerApp
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            //dictionary.Source = new Uri("App.xaml", UriKind.RelativeOrAbsolute);
+
             if (!File.Exists("imageCache.json"))
             {
                 return;
@@ -40,8 +45,23 @@ namespace ExplorerApp
 
             // Преобразование byte[] обратно в BitmapSource
             imageCache = deserializedDictBytes.ToDictionary(pair => pair.Key, pair => BytesToBitmapSource(pair.Value));
-            
+
+            Button bt = new Button();
+            Style myStyle = (Style)Application.Current.Resources["CustomButtonStyle"];
+            bt.Style = myStyle;
+            bt.Tag = "D:";
+            bt.Click += MenuButtonClick;
+            bt.Content = "Локальный диск " + bt.Tag + "/";
+            PanelQuickAccess.Children.Add(bt);
+
         }
+        private async void MenuButtonClick(object sender, RoutedEventArgs e)
+        {
+            var dir = (sender as Button).Tag;
+
+            await GetDirectoriesAndFiles(dir.ToString());
+        }
+
 
         private async void HiddenBt_Click(object sender, RoutedEventArgs e)
         {
@@ -124,8 +144,8 @@ namespace ExplorerApp
 
         internal async Task GetDirectoriesAndFiles(string path)
         {
-            var directories = await Task.Run(() => Directory.GetDirectories(path).ToList());
-            var files = await Task.Run(() => Directory.GetFiles(path).ToList());
+            var directories = await Task.Run(() => Directory.GetDirectories(path+"\\").ToList());
+            var files = await Task.Run(() => Directory.GetFiles(path+"//").ToList());
             
             if ((string)HiddenBt.Content != (string)App.Current.FindResource("ShowHidden"))
             {
@@ -153,7 +173,12 @@ namespace ExplorerApp
             ItemsCount.Content = $"Элементов: {list.Count}"; //"Элементов: " + list.Count;
             LabelItemsCount.Content = imageCache.Count.ToString();
 
+            
             dgExplorer.ScrollIntoView(0);
+
+            //Button bt = new Button();
+            //bt.Name = "C:"
+            //PanelQuickAccess.Children.Add();
         }
 
         private async Task<Model> CreateModelFromPath(string path, bool isDirectory)
@@ -223,7 +248,11 @@ namespace ExplorerApp
         private async void DgExplorer_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             string cellValue = string.Empty;
-            if ((Model)dgExplorer.SelectedItem == null)
+            if (sender is ExplorerApp.MainWindow)
+            {   
+                cellValue = TbPath.Text;   
+            }
+            else if((Model) dgExplorer.SelectedItem == null)
             {
                 return;
             }
@@ -240,17 +269,18 @@ namespace ExplorerApp
                     {
                         var selectedRow = ((Model)dgExplorer.SelectedItem).Path;
 
-                        ProcessStartInfo startInfo = new ProcessStartInfo(selectedRow)
-                        {
-                            FileName = selectedRow,
-                            UseShellExecute = false
-                        };
+                        //ProcessStartInfo startInfo = new ProcessStartInfo(selectedRow)
+                        //{
+                        //    FileName = selectedRow,
+                        //    UseShellExecute = false
+                        //};
                         Process.Start(selectedRow);
                         return;
                     }
-                    await GetDirectoriesAndFiles(cellValue);
+                    
                 }
-            }            
+            }
+            await GetDirectoriesAndFiles(cellValue);
         }
 
         private async void BackBt_Click(object sender, RoutedEventArgs e)
@@ -259,6 +289,8 @@ namespace ExplorerApp
             if (list.Count == 1)
             {
                 Drives drives = new Drives();
+                drives.Left = this.Left;
+                drives.Top = this.Top;
                 drives.Show();
                 this.Close();
                 return;
@@ -268,6 +300,45 @@ namespace ExplorerApp
                 list.RemoveAt(list.Count - 1);
                 await GetDirectoriesAndFiles(string.Join("\\", list));
             }
+
+            
+        }
+        private void FindBt_Click(object sender, RoutedEventArgs e)
+        {
+            DgExplorer_MouseDoubleClick(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left));
+        }
+
+        private void TbPath_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                DgExplorer_MouseDoubleClick(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left));
+            }
+        }
+
+        public bool IsMenuOpen { get; set; } = true;
+        private void ToggleMenu_Click(object sender, RoutedEventArgs e)
+        {
+            DoubleAnimation animation = new DoubleAnimation();
+            if (IsMenuOpen)
+            {
+                animation.To = 0;
+                ToggleMenu.Content = (string)App.Current.FindResource("OpenMenu");
+            }
+            else
+            {
+                animation.To = 150;
+                ToggleMenu.Content = (string)App.Current.FindResource("CloseMenu");
+            }
+            animation.Duration = TimeSpan.FromMilliseconds(500);
+
+            Storyboard storyboard = new Storyboard();
+            storyboard.Children.Add(animation);
+            Storyboard.SetTarget(animation, MenuPanel);
+            Storyboard.SetTargetProperty(animation, new PropertyPath(Grid.WidthProperty));
+
+            storyboard.Begin();
+            IsMenuOpen = !IsMenuOpen;
         }
     }
 }

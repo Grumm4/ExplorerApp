@@ -8,7 +8,27 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Dictionary1.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="CustomButtonStyle" TargetType="Button">
+                
+                <!-- Здесь вы можете определить свойства стиля, такие как Background, Foreground, FontSize и т. д. -->
+                <Style.Setters>
+                    <!--<Setter Property="OverridesDefaultStyle" Value="True"/>-->
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="BorderThickness" Value="0.6"/>
+                    <Setter Property="Width" Value="{Binding Width}"/>
+                    <Setter Property="Height" Value="{Binding Height}"/>
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="Gray"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
+        
+        
         
     </Application.Resources>
 </Application>

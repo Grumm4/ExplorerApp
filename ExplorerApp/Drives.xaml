@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ExplorerApp"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="Drives" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Drives" Height="450" Width="800" >
     <Grid>
         <DataGrid x:Name="dgDrives" AutoGenerateColumns="False" Background="Transparent"
           GridLinesVisibility="None" BorderThickness="0" CanUserResizeColumns="False" CanUserReorderColumns="False"
